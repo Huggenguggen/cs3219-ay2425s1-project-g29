@@ -70,5 +70,45 @@ def active_users():
     except Exception as e:
         return jsonify(error=str(e)), 500
 
+@app.route('/users/<uid>', methods=['DELETE'])
+def delete_user(uid):
+    try:
+        # Delete the user using Firebase Auth
+        auth.delete_user(uid)
+
+        return jsonify({"message": f"User with UID {uid} deleted successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to delete user", "details": str(e)}), 500
+
+# TODO: GET PATCHING USER TO WORK
+@app.route('/users/<uid>', methods=['PATCH'])
+def patch_user(uid):
+    try:
+        # Extract fields to update from the request body
+        data = request.json
+
+        # Prepare arguments for updating the user
+        user_updates = {}
+
+        if 'displayName' in data:
+            user_updates['displayName'] = data['displayName']
+        if 'email' in data:
+            user_updates['email'] = data['email']
+        
+        # Update user with the given fields
+        updated_user = auth.update_user(uid, **user_updates)
+
+        return jsonify({
+            "message": f"User with UID {uid} updated successfully",
+            "updated_user": {
+                "displayName": updated_user.display_name,
+                "email": updated_user.email
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": "Failed to update user", "details": str(e)}), 500
+
 if __name__ == '__main__':
   app.run(debug=True)

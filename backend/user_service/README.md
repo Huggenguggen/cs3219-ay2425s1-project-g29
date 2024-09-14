@@ -4,6 +4,7 @@
 - Have at least python 3.8 installed
 - Run `python3 -m venv .venv` to create a virtual environment
 - Run `.venv\Scripts\activate` to start the virtual environment
+- To exit the virtual environment, `deactivate venv`
 - Run `pip install -r requirements.txt` to install dependencies
 
 ## Env variables
