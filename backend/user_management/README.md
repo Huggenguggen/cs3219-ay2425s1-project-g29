@@ -9,7 +9,7 @@
 ## Env variables
 - Set the following environment variables in a `.env` file.
 - CRED_PATH which is the path to the credentials file.
-- You can get the credentials file from the firebase console.
+- You can get the credentials file from the firebase console under service accounts --> firebase admin sdk.
 
 ## Run the server
 - Follow the above
