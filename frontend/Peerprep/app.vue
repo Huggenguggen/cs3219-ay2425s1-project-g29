@@ -6,7 +6,7 @@ const router = useRouter()
 onMounted(() => {
   watch(user, (currentUser, prevUser) => {
     if (prevUser && !currentUser) {
-      return router.replace('/login')
+      return router.replace('/users/login')
     }
   })
 }
@@ -16,7 +16,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+
+  <NuxtLayout>
     <NuxtPage />
-  </div>
+  </NuxtLayout>
+
 </template>
