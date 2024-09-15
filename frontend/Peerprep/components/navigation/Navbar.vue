@@ -24,10 +24,9 @@ function handleSignOut() {
 
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                    <Avatar class="hover:shadow-xl hover:bg-gray-300  transition-all duration-300 cursor-pointer">
-                        <AvatarImage
-                            src="https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80"
-                            alt="User Avatar" />
+                    <Avatar size="xs"
+                        class="hover:shadow-xl hover:bg-gray-300  transition-all duration-300 cursor-pointer">
+                        <AvatarImage :src="user.photoURL" alt="User Avatar" />
                         <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
 
