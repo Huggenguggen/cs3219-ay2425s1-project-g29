@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth';
 const auth = useFirebaseAuth();
 const user = useCurrentUser();
 
+console.log("user", user)
 import NavLink from '~/components/navigation/NavLink.vue';
 function handleSignOut() {
     signOut(auth)
@@ -33,7 +34,7 @@ function handleSignOut() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent class="w-fit" align="end">
                     <DropdownMenuItem>
-                        <NuxtLink to="/users/profile">Settings</NuxtLink>
+                        <NuxtLink to="/users/settings">Settings</NuxtLink>
                     </DropdownMenuItem>
                     <DropdownMenuItem @click="handleSignOut">Sign out</DropdownMenuItem>
                 </DropdownMenuContent>
