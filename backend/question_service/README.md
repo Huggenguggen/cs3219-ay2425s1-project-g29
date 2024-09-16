@@ -14,13 +14,14 @@
 
 ## Run the server
 - Follow the above
-- Make sure you are in the `user_management` directory
+- Make sure you are in the `question_service/app` directory
 - run `flask --app main run`
 
 ## For debugging
 - Use `flask --app main run --debug`
 
 ## Endpoints
-- GET `http://localhost:5000/users`
-- GET `http://localhost:5000/users/active`
-- GET `http://localhost:5000/users/<user_id>`
+- POST `http://localhost:5000/questions`
+- GET `http://localhost:5000/questions`
+- DELETE `http://localhost:5000/questions/<id>`
+- PUT `http://localhost:5000/questoins/<id>`

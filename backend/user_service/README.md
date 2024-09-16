@@ -14,7 +14,7 @@
 
 ## Run the server
 - Follow the above
-- Make sure you are in the `user_management` directory
+- Make sure you are in the `user_service/app` directory
 - run `flask --app main run`
 
 ## For debugging
@@ -24,3 +24,5 @@
 - GET `http://localhost:5000/users`
 - GET `http://localhost:5000/users/active`
 - GET `http://localhost:5000/users/<user_id>`
+- DELETE `http://localhost:5000/users/<user_id>`
+- PATCH `http://localhost:5000/users/<user_id>`
