@@ -22,10 +22,50 @@ CORS(app)
 REQUIRED_FIELDS = ['title', 'description', 'category', 'difficulty']
 
 def validate_question_data(data):
+    # Check for missing fields
     missing_fields = [field for field in REQUIRED_FIELDS if field not in data]
     if missing_fields:
         return False, f"Missing fields: {', '.join(missing_fields)}"
+    
+    # Validate title
+    if not isinstance(data['title'], str):
+        return False, "Title must be a string."
+
+    # Validate description
+    if not isinstance(data['description'], str):
+        return False, "Description must be a string."
+
+    # Validate category
+    if not isinstance(data['category'], list) or not all(isinstance(cat, str) for cat in data['category']):
+        return False, "Category must be an array of strings."
+
+    # Remove duplicates in the category
+    data['category'] = list(set(data['category']))
+
+    # Validate difficulty
+    valid_difficulties = ['easy', 'medium', 'hard']
+    if not isinstance(data['difficulty'], str) or data['difficulty'].lower() not in valid_difficulties:
+        return False, "Difficulty must be one of 'easy', 'medium', or 'hard'."
+
     return True, None
+
+def is_title_unique(title, exclude_id=None):
+    """
+    Check if the question title is unique.
+    If `exclude_id` is provided, the question with that ID will be excluded from the uniqueness check (useful for updates).
+    """
+    questions_ref = db.collection('questions')
+    normalized_title = title.strip().lower()
+
+    query = questions_ref.stream()
+
+    for doc in query:
+        doc_data = doc.to_dict()
+        existing_title = doc_data['title'].strip().lower()
+        if existing_title == normalized_title and (exclude_id is None or doc.id != exclude_id):
+            return False 
+    return True
+
 
 @app.route('/questions', methods=['POST'])
 def add_question():
@@ -36,6 +76,10 @@ def add_question():
     is_valid, error_message = validate_question_data(question_data)
     if not is_valid:
         return jsonify({"error": error_message}), 400  # Return bad request
+
+    # Check if the title is unique
+    if not is_title_unique(question_data['title']):
+        return jsonify({"error": "A question with the same title already exists."}), 400
 
     # Add the question to Firestore
     question_ref = db.collection('questions').add(question_data)
@@ -88,6 +132,11 @@ def update_question(id):
     is_valid, error_message = validate_question_data(question_data)
     if not is_valid:
         return jsonify({"error": error_message}), 400  # Return bad request
+
+    # Check if the title is unique (excluding the current question's ID)
+    if not is_title_unique(question_data['title'], exclude_id=id):
+        return jsonify({"error": "A question with the same title already exists."}), 400
+
 
     # Update the specific question by its Firestore document ID
     question_ref = db.collection('questions').document(id)
