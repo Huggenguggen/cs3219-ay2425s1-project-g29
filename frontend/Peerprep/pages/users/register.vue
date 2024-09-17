@@ -1,16 +1,32 @@
 <script setup>
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+
+const auth = useFirebaseAuth()
+const router = useRouter()
+
 const email = ref("")
 const displayName = ref("")
 const password = ref('');
 const repeatPassword = ref('');
 const passwordMismatch = computed(() => password.value !== repeatPassword.value);
+
 const handleSubmit = () => {
     if (!passwordMismatch.value) {
         console.log('Email:', email.value);
         console.log('Password:', password.value);
-    }
 
+        register().then(() => router.replace('/'));
+    }
 };
+
+const register = async () => {
+    try {
+        await createUserWithEmailAndPassword(auth, email.value, password.value);
+        alert("Registration Successful!");
+    } catch (error) {
+        alert("Registration Failed: " + error.message);
+    }
+}
 </script>
 
 <template>

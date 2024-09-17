@@ -1,5 +1,5 @@
 <script setup>
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth'
+import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth'
 
 const auth = useFirebaseAuth()
 const router = useRouter()
@@ -16,7 +16,17 @@ const handleSubmit = () => {
   console.log('Password:', password.value);
 
   // You can perform API calls or form validation here
+  login().then(() => router.replace('/'))
 };
+
+const login = async () => {
+  try {
+    await signInWithEmailAndPassword(auth, email.value, password.value);
+    alert('Login Successful');
+  } catch (error) {
+    alert("Login failed: " + error.message);
+  }
+}
 </script>
 
 <template>
