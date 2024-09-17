@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { columns } from '@/components/questions/columns'
+import { getColumns } from '@/components/questions/columns'
 import QuestionTable from '@/components/questions/QuestionTable.vue';
 import type { Question } from '~/types/Question';
 
 const { data, status, error, refresh } = await useFetch('http://localhost:5000/questions')
 const questions = ref<Question[]>([]);
+const columns = getColumns();
 
 watchEffect(() => {
   if (data.value) {

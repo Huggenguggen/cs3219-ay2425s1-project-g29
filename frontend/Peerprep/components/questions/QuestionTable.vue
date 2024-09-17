@@ -1,11 +1,11 @@
 <script setup lang="ts" generic="TData, TValue">
 import CreateQuestionDialog from './CreateQuestionDialog.vue';
-import type { ColumnDef } from '@tanstack/vue-table'
+import { getColumns } from '@/components/questions/columns'; // Import getColumns instead of columns
 import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-} from '@tanstack/vue-table'
+} from '@tanstack/vue-table';
 
 import {
   Table,
@@ -14,23 +14,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 
 const props = defineProps<{
-  columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  refreshData: () => void;
-}>()
+  refreshData: () => void; // Received from the parent
+}>();
+
+const columns = getColumns(props.refreshData); // Pass refreshData to getColumns
 
 const table = useVueTable({
   get data() { return props.data },
-  get columns() { return props.columns },
+  get columns() { return columns }, // Use dynamically created columns
   getCoreRowModel: getCoreRowModel(),
-})
-
-const handleQuestionDeleted = () => {
-  props.refreshData();
-}
+});
 </script>
 
 <template>

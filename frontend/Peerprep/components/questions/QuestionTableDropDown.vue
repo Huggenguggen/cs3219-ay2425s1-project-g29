@@ -6,6 +6,8 @@ const props = defineProps<{
     question: Question
 }>()
 
+const emit = defineEmits(['refresh']);
+
 const deleteQuestion = async () => {
   try {
     const { error } = await useFetch(`http://localhost:5000/questions/${props.question.uid}`, {
@@ -16,6 +18,7 @@ const deleteQuestion = async () => {
       console.error('Error deleting question:', error.value);
     } else {
       console.log('Deleted question successfully');
+      emit('refresh');
     }
   } catch (err) {
     console.error('An error occurred while deleting the question:', err);
