@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import QuestionTable from '@/components/questions/QuestionTable.vue';
 import type { Question } from '~/types/Question';
+import Toaster from '@/components/ui/toast/Toaster.vue';
 
 const questions = ref<Question[]>([]);
 
@@ -35,4 +36,5 @@ const refreshData = () => {
   <div class="container py-10 mx-auto">
     <QuestionTable :data="questions" :refresh-data="refreshData" :key="questions"/>
   </div>
+  <Toaster />
 </template>

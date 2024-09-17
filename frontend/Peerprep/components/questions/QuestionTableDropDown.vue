@@ -2,10 +2,13 @@
 import type { Question } from '~/types/Question';
 import { MoreHorizontal } from 'lucide-vue-next'
 import EditQuestionDialog from './EditQuestionDialog.vue';
+import { useToast } from '@/components/ui/toast/use-toast';
 
 const props = defineProps<{
     question: Question
 }>()
+
+const { toast } = useToast();
 
 const emit = defineEmits(['refresh']);
 

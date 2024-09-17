@@ -1,8 +1,11 @@
 <script setup lang="ts">
 
 import type { Question } from '~/types/Question';
+import { useToast } from '@/components/ui/toast/use-toast';
 
 const props = defineProps<{ refreshData: () => void }>();
+
+const { toast } = useToast();
 
 const question = ref<Question>({
     title: "",
@@ -27,7 +30,12 @@ const submitQuestion = async () => {
         });
         
         if (error.value) {
-            console.error("Error submitting question:", error.value);
+            const errorMessage = await error.value?.data;  
+            toast({
+                title: "Error submitting question:",
+                description: errorMessage.error,  // Use the error message from the backend
+            });
+            console.error("Error submitting question:", errorMessage.error);
         } else {
             console.log("Submitted question successfully:", data.value);
             props.refreshData();

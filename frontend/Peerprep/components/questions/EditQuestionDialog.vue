@@ -1,10 +1,14 @@
 <script setup lang="ts">
+
 import type { Question } from '~/types/Question';
+import { useToast } from '@/components/ui/toast/use-toast';
 
 const props = defineProps<{
   question: Question;
   refreshData: () => void;
 }>();
+
+const { toast } = useToast();
 
 const editedQuestion = ref({
   title: props.question.title,
@@ -29,6 +33,11 @@ const updateQuestion = async () => {
     });
     
     if (error.value) {
+      const errorMessage = await error.value?.data;
+      toast({
+          title: "Error updating question:",
+          description: errorMessage.error,  // Use the error message from the backend
+      });
       console.error("Error updating question:", error.value);
     } else {
       console.log("Updated question successfully:", data.value);
