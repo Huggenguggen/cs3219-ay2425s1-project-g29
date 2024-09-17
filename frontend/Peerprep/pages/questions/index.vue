@@ -28,12 +28,11 @@ fetchQuestions();
 
 const refreshData = () => {
   fetchQuestions();
-  reloadNuxtApp();
 };
 </script>
 
 <template>
   <div class="container py-10 mx-auto">
-    <QuestionTable :data="questions" :refresh-data="refreshData" />
+    <QuestionTable :data="questions" :refresh-data="refreshData" :key="questions"/>
   </div>
 </template>
