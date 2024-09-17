@@ -1,5 +1,5 @@
 # CS3219 Project (PeerPrep) - AY2425S1
-## Group: Gxx
+## Group: G29
 
 ### Note: 
 - You can choose to develop individual microservices within separate folders within this repository **OR** use individual repositories (all public) for each microservice. 
@@ -28,5 +28,7 @@
 ## Setup
 - Install [Python 3.8](https://www.python.org/downloads/)
 - Install [NodeJS LTS](https://nodejs.org/en/)
-- Run the microservices first following the README.md in each folder.
+- Setup the microservices first following the `README.md` in each folder.
+- Run the microservices.
+- Follow the steps in the `README.md` in `Peerprep` to setup the frontend.
 - Run the frontend using `npm run dev`
