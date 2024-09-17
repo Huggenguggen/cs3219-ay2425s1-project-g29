@@ -6,6 +6,7 @@ const router = useRouter()
 
 const email = ref('')
 const displayName = ref('')
+const isRegistering = ref(false)
 const password = ref('');
 const repeatPassword = ref('');
 const firebaseErrorMessage = ref('');
@@ -30,11 +31,13 @@ const allFieldsNotValid = computed(() => {
     var valuesNotValid = (emailNotValid.value || passwordRequirementNotMet.value || passwordMismatch.value);
     var valuesEmpty = email.value == "" || displayName.value == "" || password.value == "" || repeatPassword.value == "";
 
-    return valuesNotValid || valuesEmpty;
+    return valuesNotValid || valuesEmpty || isRegistering.value;
 });
 
 // Submit button function
 const handleSubmit = () => {
+    isRegistering.value = true
+    firebaseErrorMessage.error = ''
     if (!passwordMismatch.value) {
         register()
             .then(() => router.replace('/'))
@@ -49,6 +52,9 @@ const handleSubmit = () => {
                 } else {
                     firebaseErrorMessage.value = "Unknown Firebase Error: " + error.message
                 }
+            })
+            .finally(() => {
+                isRegistering.value = false
             });
     }
 };
@@ -107,7 +113,7 @@ const register = async () => {
                     <p v-if="firebaseErrorMessage" class="text-red-500">{{ firebaseErrorMessage }}</p>
 
                     <Button type="submit" class="w-full" :disabled="allFieldsNotValid">
-                        Create an account
+                        {{ isRegistering ? "Registering..." : "Create an account" }}
                     </Button>
                 </form>
 
