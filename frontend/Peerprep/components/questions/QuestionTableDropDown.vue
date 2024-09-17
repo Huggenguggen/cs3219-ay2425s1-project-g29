@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Question } from '~/types/Question';
 import { MoreHorizontal } from 'lucide-vue-next'
+import EditQuestionDialog from './EditQuestionDialog.vue';
 
 const props = defineProps<{
     question: Question
@@ -25,10 +26,19 @@ const deleteQuestion = async () => {
   }
 };
 
+const isEditDialogOpen = ref(false);
+
+const openEditDialog = () => {
+  isEditDialogOpen.value = true;
+};
+
+const closeEditDialog = () => {
+  isEditDialogOpen.value = false;
+};
+
 </script>
 
 <template>
-
     <Dialog>
         <DropdownMenu>
             <DropdownMenuTrigger as-child>
@@ -39,17 +49,16 @@ const deleteQuestion = async () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DialogTrigger as-child>
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                </DialogTrigger>
-
+                <DropdownMenuItem @click="openEditDialog">Edit</DropdownMenuItem>
                 <DropdownMenuItem @click="deleteQuestion">Delete</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
-        <DialogContent>
-            <div>
-                {{ question.title }}
-            </div>
-        </DialogContent>
+    </Dialog>
+
+    <Dialog :open="isEditDialogOpen" @update:open="closeEditDialog">
+        <EditQuestionDialog 
+            :question="question"
+            :refresh-data="() => { emit('refresh'); closeEditDialog(); }"
+        />
     </Dialog>
 </template>

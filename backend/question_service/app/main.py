@@ -56,6 +56,22 @@ def get_questions():
     
     return jsonify(questions), 200
 
+@app.route('/questions/<id>', methods=['GET'])
+def get_question(id):
+    try:
+        questions = []
+        
+        # Retrieve all questions from Firestore
+        question_ref = db.collection('questions').document(id)
+
+        question = question_ref.get()
+        if question.exists:
+            return jsonify(question.to_dict()), 200
+        else:
+            return jsonify({"error": "Question not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/questions/<id>', methods=['DELETE'])
 def delete_question(id):
     # Delete a question by its Firestore document ID

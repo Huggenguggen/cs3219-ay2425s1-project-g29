@@ -81,7 +81,7 @@ const submitQuestion = async () => {
                     </Select>
                 </div>
                 <DialogClose>
-                    <Button type="submit" @click="closeDialog" class="mt-4">
+                    <Button type="submit" class="mt-4">
                         Submit
                     </Button>
                 </DialogClose>

@@ -21,7 +21,7 @@ const props = defineProps<{
   refreshData: () => void; // Received from the parent
 }>();
 
-const columns = getColumns(props.refreshData); // Pass refreshData to getColumns
+const columns = getColumns(props.refreshData); 
 
 const table = useVueTable({
   get data() { return props.data },
