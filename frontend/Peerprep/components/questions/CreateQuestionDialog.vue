@@ -13,9 +13,16 @@ const question = ref<Question>({
 
 const submitQuestion = async () => {
     try {
+        const category_arr = question.value.category.split(',').map(cat => cat.trim());
+        
         const { data, error } = await useFetch('http://localhost:5000/questions', {
             method: 'POST',
-            body: JSON.stringify(question.value),
+            body: JSON.stringify({
+                title: question.value.title,
+                description: question.value.description,
+                category: category_arr, // Send category as an array
+                difficulty: question.value.difficulty
+            }),
             headers: { 'Content-Type': 'application/json' }
         });
         
@@ -61,7 +68,7 @@ const submitQuestion = async () => {
 
                 <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="category">Category</Label>
-                    <Input id="category" v-model="question.category" placeholder="Enter question category"
+                    <Input id="category" v-model="question.category" placeholder="Enter categories separated by commas"
                         class="col-span-3" required />
                 </div>
 

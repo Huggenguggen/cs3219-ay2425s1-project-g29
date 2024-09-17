@@ -15,10 +15,17 @@ const editedQuestion = ref({
 
 const updateQuestion = async () => {
   try {
+    const category_arr = editedQuestion.value.category.split(',').map(cat => cat.trim());
+
     const { data, error } = await useFetch(`http://localhost:5000/questions/${props.question.id}`, {
-      method: 'PUT',
-      body: JSON.stringify(editedQuestion.value),
-      headers: { 'Content-Type': 'application/json' }
+        method: 'PUT',
+        body: JSON.stringify({
+            title: editedQuestion.value.title,
+            description: editedQuestion.value.description,
+            category: category_arr, // Send category as an array
+            difficulty: editedQuestion.value.difficulty
+        }),
+        headers: { 'Content-Type': 'application/json' }
     });
     
     if (error.value) {

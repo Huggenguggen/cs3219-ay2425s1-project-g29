@@ -11,12 +11,12 @@ const fetchQuestions = async () => {
     console.error('Error fetching questions:', error.value);
   } else if (data.value) {
     questions.value = data.value
-      .sort((a, b) => a.category.localeCompare(b.category))
+      .sort((a, b) => a.title.localeCompare(b.title))
       .map((question, index) => ({
         id: question.id,
         title: question.title,
         description: question.description,
-        category: question.category,
+        category: Array.isArray(question.category) ? question.category.join(', ') : question.category,
         difficulty: question.difficulty,
         index: index + 1
       }));
