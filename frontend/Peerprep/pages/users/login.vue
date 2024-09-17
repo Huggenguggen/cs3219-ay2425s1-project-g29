@@ -18,24 +18,13 @@ const email = ref("");
 const password = ref("");
 const isLoggingIn = ref(false);
 const firebaseErrorMessage = ref("");
+
 const handleSubmit = () => {
   isLoggingIn.value = true;
   firebaseErrorMessage.value = "";
   login()
     .then(() => router.replace("/"))
-    .catch((error) => {
-      var errorCode = error.code;
-      if (
-        errorCode == "auth/invalid-email" ||
-        errorCode == "auth/user-not-found" ||
-        errorCode == "auth/wrong-password" ||
-        errorCode == "auth/invalid-credential"
-      ) {
-        firebaseErrorMessage.value = "Incorrect email or password.";
-      } else {
-        firebaseErrorMessage.value = "Login error. Contact administrator.";
-      }
-    })
+    .catch(handleFirebaseLoginErrors)
     .finally(() => {
       isLoggingIn.value = false;
     });
@@ -44,6 +33,20 @@ const handleSubmit = () => {
 const login = async () => {
   await signInWithEmailAndPassword(auth, email.value, password.value);
 };
+
+const handleFirebaseLoginErrors = (error) => {
+  var errorCode = error.code;
+  if (
+    errorCode == "auth/invalid-email" ||
+    errorCode == "auth/user-not-found" ||
+    errorCode == "auth/wrong-password" ||
+    errorCode == "auth/invalid-credential"
+  ) {
+    firebaseErrorMessage.value = "Incorrect email or password.";
+  } else {
+    firebaseErrorMessage.value = "Login error. Contact administrator.";
+  }
+}
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup>
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 const auth = useFirebaseAuth()
 const router = useRouter()
@@ -14,8 +14,20 @@ const firebaseErrorMessage = ref('');
 // Computed properties
 const emailNotValid = computed(() => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return (!emailPattern.test(email.value) && email.value != "");
+    return !emailPattern.test(email.value) && (email.value != "");
 });
+
+const displayNameLengthNotValid = computed(() => {
+    const displayNameValue = displayName.value || '';
+    const displayNameLengthCheck = displayNameValue.length >=2 && displayNameValue.length <= 50;
+    return !displayNameLengthCheck && (displayNameValue.length != "")
+});
+
+const displayNameContentsNotValid = computed(() => {
+    const displayNameValue = displayName.value || '';
+    const displayNamePattern = /^[a-zA-Z0-9 _-]+$/;
+    return !displayNamePattern.test(displayNameValue) && (displayNameValue.length != "")
+})
 
 const passwordRequirementNotMet = computed(() => {
     const passwordValue = password.value || '';  // Ensure that passwordValue is a string
@@ -24,14 +36,14 @@ const passwordRequirementNotMet = computed(() => {
 });
 
 const passwordMismatch = computed(() => {
-    return password.value !== repeatPassword.value && repeatPassword.value != "";
+    return (password.value !== repeatPassword.value) && (repeatPassword.value != "");
 });
 
 const allFieldsNotValid = computed(() => {
     var valuesNotValid = (emailNotValid.value || passwordRequirementNotMet.value || passwordMismatch.value);
     var valuesEmpty = email.value == "" || displayName.value == "" || password.value == "" || repeatPassword.value == "";
 
-    return valuesNotValid || valuesEmpty || isRegistering.value;
+    return valuesNotValid || valuesEmpty || isRegistering.value || displayNameLengthNotValid.value || displayNameContentsNotValid.value;
 });
 
 // Submit button function
@@ -41,18 +53,7 @@ const handleSubmit = () => {
     if (!passwordMismatch.value) {
         register()
             .then(() => router.replace('/'))
-            .catch((error) => {
-                var errorCode = error.code;
-                if (errorCode == 'auth/email-already-in-use') {
-                    firebaseErrorMessage.value = "Account with that email already exists.";
-                } else if (errorCode == 'auth/invalid-email') {
-                    firebaseErrorMessage.value = "Email address is not valid.";
-                } else if (errorCode == 'auth/weak-password') {
-                    firebaseErrorMessage.value = "The password is not strong enough.";
-                } else {
-                    firebaseErrorMessage.value = "Unknown Firebase Error: " + error.message
-                }
-            })
+            .catch(handleFirebaseRegistrationErrors)
             .finally(() => {
                 isRegistering.value = false
             });
@@ -61,7 +62,28 @@ const handleSubmit = () => {
 
 // Register user with Firebase
 const register = async () => {
-    await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+
+    await updateProfile(userCredential.user, {
+        displayName: displayName.value
+    }).catch(handleFirebaseUpdateProfileErrors);
+}
+
+const handleFirebaseRegistrationErrors = (error) => {
+    var errorCode = error.code;
+    if (errorCode == 'auth/email-already-in-use') {
+        firebaseErrorMessage.value = "Account with that email already exists.";
+    } else if (errorCode == 'auth/invalid-email') {
+        firebaseErrorMessage.value = "Email address is not valid.";
+    } else if (errorCode == 'auth/weak-password') {
+        firebaseErrorMessage.value = "The password is not strong enough.";
+    } else {
+        firebaseErrorMessage.value = "Unknown Firebase Error: " + error.message
+    }
+};
+
+const handleFirebaseUpdateProfileErrors = (error) => {
+    alert("Error updating profile name. " + error.message)
 }
 </script>
 
@@ -91,6 +113,8 @@ const register = async () => {
                         <Label for="displayName">Display Name</Label>
                         <Input id="displayName" name="displayName" v-model="displayName" type="text" placeholder=""
                             required />
+                        <p v-if="displayNameLengthNotValid" class="text-red-500 text-sm">Length should be between 2 and 50 characters.</p>
+                        <p v-if="displayNameContentsNotValid" class="text-red-500 text-sm">Display Name contents are not valid.</p>
                     </div>
 
                     <div class="grid gap-2">
