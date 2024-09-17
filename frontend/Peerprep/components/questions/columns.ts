@@ -4,7 +4,7 @@ import type { Question } from "~/types/Question";
 import QuestionTableDropDown from "./QuestionTableDropDown.vue";
 
 export const getColumns = (refreshData: () => void): ColumnDef<Question>[] => [
-  { accessorKey: "id", header: "Id" },
+  { accessorKey: "index", header: "Idx" },
   { accessorKey: "title", header: "Title" },
   { accessorKey: "description", header: "Description" },
   { accessorKey: "category", header: "Category" },

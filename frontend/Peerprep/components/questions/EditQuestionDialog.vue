@@ -11,12 +11,11 @@ const editedQuestion = ref({
   description: props.question.description,
   category: props.question.category,
   difficulty: props.question.difficulty,
-  uid: props.question.uid,
 });
 
 const updateQuestion = async () => {
   try {
-    const { data, error } = await useFetch(`http://localhost:5000/questions/${props.question.uid}`, {
+    const { data, error } = await useFetch(`http://localhost:5000/questions/${props.question.id}`, {
       method: 'PUT',
       body: JSON.stringify(editedQuestion.value),
       headers: { 'Content-Type': 'application/json' }

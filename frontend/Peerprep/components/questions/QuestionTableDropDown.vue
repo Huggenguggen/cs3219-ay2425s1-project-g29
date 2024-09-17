@@ -11,7 +11,7 @@ const emit = defineEmits(['refresh']);
 
 const deleteQuestion = async () => {
   try {
-    const { error } = await useFetch(`http://localhost:5000/questions/${props.question.uid}`, {
+    const { error } = await useFetch(`http://localhost:5000/questions/${props.question.id}`, {
       method: 'DELETE',
     });
     
@@ -58,7 +58,7 @@ const closeEditDialog = () => {
     <Dialog :open="isEditDialogOpen" @update:open="closeEditDialog">
         <EditQuestionDialog 
             :question="question"
-            :refresh-data="() => { emit('refresh'); closeEditDialog(); }"
+            :refreshData="() => { emit('refresh'); closeEditDialog(); }"
         />
     </Dialog>
 </template>
