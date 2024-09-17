@@ -8,7 +8,7 @@ export const columns: ColumnDef<Question>[] = [
   { accessorKey: "title", header: "Title" },
   { accessorKey: "description", header: "Description" },
   { accessorKey: "category", header: "Category" },
-  { accessorKey: "complexity", header: "Complexity" },
+  { accessorKey: "difficulty", header: "Difficulty" },
   {
     id: "actions",
     enableHiding: false,

@@ -6,7 +6,7 @@ const question = ref<Question>({
     title: "",
     description: "",
     category: "",
-    complexity: "easy",
+    difficulty: "easy",
 });
 
 const submitQuestion = () => {
@@ -49,8 +49,8 @@ const submitQuestion = () => {
                 </div>
 
                 <div class="grid grid-cols-4 items-center gap-4">
-                    <Label for="complexity">Complexity</Label>
-                    <Select id="complexity" v-model="question.complexity">
+                    <Label for="difficulty">Difficulty</Label>
+                    <Select id="difficulty" v-model="question.difficulty">
                         <SelectTrigger class="col-span-3">
                             <SelectValue placeholder="Select a timezone" />
                         </SelectTrigger>

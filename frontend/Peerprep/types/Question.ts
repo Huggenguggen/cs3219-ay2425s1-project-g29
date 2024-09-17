@@ -3,5 +3,5 @@ export type Question = {
   title: string;
   description: string;
   category: string;
-  complexity: "easy" | "medium" | "hard";
+  difficulty: "easy" | "medium" | "hard";
 };
