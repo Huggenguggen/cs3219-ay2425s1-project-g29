@@ -19,18 +19,10 @@ watchEffect(() => {
   }
 })
 
-const refreshData = () => {
-  refresh()
-}
-
-// Add meta object to pass refreshData to the table
-const tableMeta = {
-  refreshData,
-}
 </script>
 
 <template>
   <div class="container py-10 mx-auto">
-    <QuestionTable :columns="columns" :data="questions" :refresh-data="refreshData" :meta="tableMeta" />
+    <QuestionTable :columns="columns" :data="questions" :refresh-data="refresh" />
   </div>
 </template>

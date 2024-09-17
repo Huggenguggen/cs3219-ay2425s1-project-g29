@@ -2,6 +2,8 @@
 
 import type { Question } from '~/types/Question';
 
+const props = defineProps<{ refreshData: () => void }>();
+
 const question = ref<Question>({
     title: "",
     description: "",
@@ -9,8 +11,23 @@ const question = ref<Question>({
     difficulty: "easy",
 });
 
-const submitQuestion = () => {
-    console.log("Submitted question:", question.value);
+const submitQuestion = async () => {
+    try {
+        const { data, error } = await useFetch('http://localhost:5000/questions', {
+            method: 'POST',
+            body: JSON.stringify(question.value),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (error.value) {
+            console.error("Error submitting question:", error.value);
+        } else {
+            console.log("Submitted question successfully:", data.value);
+            props.refreshData();
+        }
+    } catch (err) {
+        console.error("An error occurred while submitting the question:", err);
+    }
 };
 </script>
 
@@ -52,7 +69,7 @@ const submitQuestion = () => {
                     <Label for="difficulty">Difficulty</Label>
                     <Select id="difficulty" v-model="question.difficulty">
                         <SelectTrigger class="col-span-3">
-                            <SelectValue placeholder="Select a timezone" />
+                            <SelectValue placeholder="Select a difficulty" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
@@ -63,10 +80,11 @@ const submitQuestion = () => {
                         </SelectContent>
                     </Select>
                 </div>
-
-                <Button type="submit" class="mt-4">
-                    Submit
-                </Button>
+                <DialogClose>
+                    <Button type="submit" @click="closeDialog" class="mt-4">
+                        Submit
+                    </Button>
+                </DialogClose>
             </form>
         </DialogContent>
     </Dialog>

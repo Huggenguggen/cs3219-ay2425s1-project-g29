@@ -2,9 +2,25 @@
 import type { Question } from '~/types/Question';
 import { MoreHorizontal } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
     question: Question
 }>()
+
+const deleteQuestion = async () => {
+  try {
+    const { error } = await useFetch(`http://localhost:5000/questions/${props.question.uid}`, {
+      method: 'DELETE',
+    });
+    
+    if (error.value) {
+      console.error('Error deleting question:', error.value);
+    } else {
+      console.log('Deleted question successfully');
+    }
+  } catch (err) {
+    console.error('An error occurred while deleting the question:', err);
+  }
+};
 
 </script>
 
@@ -24,7 +40,7 @@ defineProps<{
                     <DropdownMenuItem>Edit</DropdownMenuItem>
                 </DialogTrigger>
 
-                <DropdownMenuItem>Delete</DropdownMenuItem>
+                <DropdownMenuItem @click="deleteQuestion">Delete</DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
         <DialogContent>

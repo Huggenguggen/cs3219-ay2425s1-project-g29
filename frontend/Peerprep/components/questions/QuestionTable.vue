@@ -17,8 +17,9 @@ import {
 } from '@/components/ui/table'
 
 const props = defineProps<{
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  refreshData: () => void;
 }>()
 
 const table = useVueTable({
@@ -26,13 +27,17 @@ const table = useVueTable({
   get columns() { return props.columns },
   getCoreRowModel: getCoreRowModel(),
 })
+
+const handleQuestionDeleted = () => {
+  props.refreshData();
+}
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center gap-y-4">
     <div class="flex w-full items-center">
       <h2 class="text-lg font-semibold mx-auto">Questions</h2>
-      <CreateQuestionDialog />
+      <CreateQuestionDialog :refresh-data="props.refreshData" />
     </div>
     <Table class="border rounded-md border-collapse">
       <TableHeader>
