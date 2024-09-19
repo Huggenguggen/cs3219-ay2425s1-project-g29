@@ -1,16 +1,48 @@
 <script setup lang="ts">
 
 import type { Question } from '~/types/Question';
+import { useToast } from '@/components/ui/toast/use-toast';
+
+const props = defineProps<{ refreshData: () => void }>();
+
+const { toast } = useToast();
 
 const question = ref<Question>({
     title: "",
     description: "",
     category: "",
-    complexity: "easy",
+    difficulty: "easy",
 });
 
-const submitQuestion = () => {
-    console.log("Submitted question:", question.value);
+const submitQuestion = async () => {
+    try {
+        const category_arr = question.value.category.split(',').map(cat => cat.trim());
+        
+        const { data, error } = await useFetch('http://localhost:5000/questions', {
+            method: 'POST',
+            body: JSON.stringify({
+                title: question.value.title,
+                description: question.value.description,
+                category: category_arr, // Send category as an array
+                difficulty: question.value.difficulty
+            }),
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (error.value) {
+            const errorMessage = await error.value?.data;  
+            toast({
+                title: "Error submitting question:",
+                description: errorMessage.error,  // Use the error message from the backend
+            });
+            console.error("Error submitting question:", errorMessage.error);
+        } else {
+            console.log("Submitted question successfully:", data.value);
+            props.refreshData();
+        }
+    } catch (err) {
+        console.error("An error occurred while submitting the question:", err);
+    }
 };
 </script>
 
@@ -44,15 +76,15 @@ const submitQuestion = () => {
 
                 <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="category">Category</Label>
-                    <Input id="category" v-model="question.category" placeholder="Enter question category"
+                    <Input id="category" v-model="question.category" placeholder="Enter categories separated by commas"
                         class="col-span-3" required />
                 </div>
 
                 <div class="grid grid-cols-4 items-center gap-4">
-                    <Label for="complexity">Complexity</Label>
-                    <Select id="complexity" v-model="question.complexity">
+                    <Label for="difficulty">Difficulty</Label>
+                    <Select id="difficulty" v-model="question.difficulty">
                         <SelectTrigger class="col-span-3">
-                            <SelectValue placeholder="Select a timezone" />
+                            <SelectValue placeholder="Select a difficulty" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
@@ -63,10 +95,11 @@ const submitQuestion = () => {
                         </SelectContent>
                     </Select>
                 </div>
-
-                <Button type="submit" class="mt-4">
-                    Submit
-                </Button>
+                <DialogClose>
+                    <Button type="submit" class="mt-4">
+                        Submit
+                    </Button>
+                </DialogClose>
             </form>
         </DialogContent>
     </Dialog>

@@ -64,6 +64,9 @@ flask --app main run -p 5000 --debug
 - **Get all questions**:  
   `GET http://localhost:5000/questions`
   
+- **Get one question by ID**:
+  `GET http://localhost:5000/questions/<id>`
+
 - **Add a question**:  
   `POST http://localhost:5000/questions`
 
