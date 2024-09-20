@@ -26,7 +26,9 @@ def process_matching_request(self, user_data):
     current_time = time.time()
     min_timestamp = current_time - 30
     key = f"matching:{topic}:{difficulty}"
+    topic_key = f"matching:{topic}"
     r.zremrangebyscore(key, "-inf", min_timestamp)
+    r.zremrangebyscore(topic_key, "-inf", min_timestamp)
 
     complete_matches = r.zrangebyscore(key, min_timestamp, "+inf")
     if len(complete_matches) > 0:
@@ -41,11 +43,10 @@ def process_matching_request(self, user_data):
     print(
         f"Added user_id={user_id} to matching set for topic={topic} and difficulty={difficulty}"
     )
-    topic_key = f"matching:{topic}"
     topic_matches = r.zrangebyscore(topic_key, min_timestamp, "+inf")
     if len(topic_matches) > 0:
         match = topic_matches[0]
-        r.zrem(key, match)
+        r.zrem(topic_key, match)
         print(
             f"Partial match found: user_id={user_id}, matched_with={match.decode('utf-8')}"
         )
