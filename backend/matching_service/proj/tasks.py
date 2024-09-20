@@ -9,6 +9,7 @@ from .celery import app
 
 
 @app.task(
+    name="process_match",
     queue="matching_queue",
     bind=True,
     max_retries=3,

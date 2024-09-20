@@ -25,7 +25,7 @@ def publish_to_matching_queue(message):
                 delivery_mode=2,
                 headers={
                     "id": str(uuid.uuid4()),
-                    "task": "proj.tasks.process_matching_request",
+                    "task": "process_match",
                 },
                 content_type="application/json",
             ),
