@@ -1,6 +1,7 @@
 from flask import json
 from .config import RABBITMQ_HOST, RABBITMQ_QUEUE
 import pika
+import uuid
 
 
 def publish_to_matching_queue(message):
@@ -12,11 +13,22 @@ def publish_to_matching_queue(message):
 
         channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
 
+        celery_message_body = {
+            "args": [message],  # The actual message as an argument
+            "kwargs": {},  # Additional keyword arguments
+        }
         channel.basic_publish(
             exchange="",
             routing_key=RABBITMQ_QUEUE,
-            body=json.dumps(message),
-            properties=pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent),
+            body=json.dumps(celery_message_body),
+            properties=pika.BasicProperties(
+                delivery_mode=2,
+                headers={
+                    "id": str(uuid.uuid4()),
+                    "task": "proj.tasks.process_matching_request",
+                },
+                content_type="application/json",
+            ),
         )
         connection.close()
     except pika.exceptions.AMQPConnectionError:

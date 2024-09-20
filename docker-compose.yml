@@ -1,0 +1,61 @@
+services:
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  matching-request:
+    build:
+      context: ./backend/matching_request
+    # command: gunicorn --reload -w 4 -b 0.0.0.0:8000 run:app
+    command: python run.py
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - FLASK_ENV=development # Set Flask environment to development
+      - FLASK_APP=run.py # Set the main Flask app
+
+    volumes:
+      - ./backend/matching_request:/app
+    ports:
+      - "8000:8000"
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/matching_request
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./backend/matching_request/requirements.txt
+  matching_service:
+    build:
+      context: ./backend/matching_service
+    # command: celery -A celery worker --loglevel=info
+    command: celery -A proj.celery worker --loglevel=info -Q matching_queue
+    volumes:
+      - ./backend/matching_service:/app
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/matching_service
+          target: /app
+          ignore:
+            - .venv/
+        - action: rebuild
+          path: ./backend/matching_service/requirements.txt
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  rabbitmq_data:
+  redis_data:
