@@ -20,12 +20,13 @@ npm install
 
 Start the development server on `http://localhost:3000`:
 
-## Production Build
-1. Make sure you are in `Peerprep` directory.
-2. Run `docker build -t peerprep .`
-3. Run `docker run --rm -it -p 3000:3000 --env-file .env --name peerprep peerprep`
-
 ```bash
 # npm
 npm run dev -- -o
 ```
+
+## Production Build
+1. Make sure you are in `Peerprep` directory.
+2. Follow the steps in the env variables section above.
+3. Run `docker build -t peerprep .`
+4. Run `docker run --rm -it -p 3000:3000 --env-file .env --name peerprep peerprep`
