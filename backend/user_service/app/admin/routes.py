@@ -56,8 +56,12 @@ def get_admin_users():
     try:
         admin_users = []
         
+        # Iterate through a list of all users
         for user in auth.list_users().iterate_all():
+            # Get custom claims from a user, assume empty if not initiated
             custom_claims = user.custom_claims or {}
+            
+            # Check if a user is an admin
             if custom_claims.get("admin") == True:
                 user_details = {
                     'uid': user.uid,
