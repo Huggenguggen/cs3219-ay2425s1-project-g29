@@ -50,14 +50,14 @@
 ## Running the Server
 
 1. Ensure the virtual environment is activated with
-    ```
-    .\venv\Scripts\activate
-    ```
+   ```
+   .\venv\Scripts\activate
+   ```
 2. Navigate to the `user_service` directory.
 3. Start the Flask server
-    ```
-    python run.py
-    ```
+   ```
+   python run.py
+   ```
 
 ## Debugging Mode
 
@@ -82,6 +82,23 @@ flask --app main run -p 5001 --debug
 - **Update a user by ID**:  
   `PATCH http://localhost:5001/users/<user_id>`
   - TODO: Not implemented properly yet
+
+### Admin Endpoints
+
+- **Assign Admin Role**:\
+  `POST http://localhost:5001/admin/users/<user_id>/roles/admin`
+
+- **Remove Admin Role**:\
+  `DELETE http://localhost:5001/admin/users/<user_id>/roles/admin`
+
+- **Retrieve all roles of a UID**:\
+  `GET http://localhost:5001/admin/users/<user_id>/roles`
+
+- **Check if a UID is an admin (might remove in the future)**:\
+  `GET http://localhost:5001/admin/users/<user_id>/is_admin`
+  
+- **Retrieve a list of all admins**:\
+  `GET http://localhost:5001/admin/roles/admin/users`
 
 ---
 
