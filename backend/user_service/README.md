@@ -52,6 +52,12 @@
    flask --app main run -p 5001
    ```
 
+## Using the Dockerfile 
+1. Make sure the `CRED_PATH` file in the `.env` is using the correct path formatting (i.e. `./credentials.json` NOT `.\\firebase-credentials.json`) as the container runs on linux.
+2. Change the line copying the credentails file into the dockerfile to use the correct name of yoru json.
+3. Run `docker build -t user-service .` in the `user_service` directory to create a Docker image.
+4. Run `docker run -d -p 5001:5001 user-service` to start the Docker container.
+
 ## Debugging Mode
 
 To run the server with debugging enabled:
