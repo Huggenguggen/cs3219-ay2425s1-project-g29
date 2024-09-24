@@ -40,8 +40,8 @@
    - Navigate to **Project Settings** → **Service Accounts** → **Firebase Admin SDK** -> **Generate new private key**.
    - Generate a new private key and download the credentials file to the `app` directory.
 3. Add the following variables to the `.env` file:
-   - `CRED_PATH`: This should be the absolute path to your Firebase credentials file (e.g., `/path/to/firebase/credentials.json`).
-     - On windows this will be something like `C:\\Users\\USERNAME\\path\\to\\firebase-credentials.json`
+   - `CRED_PATH`: This should be the relative path to your Firebase credentials file (e.g., `./credentials.json`).
+     - On windows this will be something like `.\\firebase-credentials.json`.
 
 ## Running the Server
 

@@ -113,4 +113,4 @@ def patch_user(uid):
         return jsonify({"error": "Failed to update user", "details": str(e)}), 500
 
 if __name__ == '__main__':
-  app.run(debug=True)
+  app.run(port=5001, debug=False, host='0.0.0.0')

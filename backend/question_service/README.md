@@ -40,8 +40,8 @@
    - Navigate to **Project Settings** → **Service Accounts** → **Firebase Admin SDK** -> **Generate new private key**.
    - Generate a new private key and download the credentials file to the `app` directory.
 3. Add the following variables to the `.env` file:
-   - `CRED_PATH`: This should be the absolute path to your Firebase credentials file (e.g., `/path/to/firebase/credentials.json`).
-     - On windows this will be something like `C:\\Users\\USERNAME\\path\\to\\firebase-credentials.json`.
+   - `CRED_PATH`: This should be the relative path to your Firebase credentials file (e.g., `./credentials.json`).
+     - On windows this will be something like `.\\credentials.json`.
 
 ## Running the Server
 
@@ -51,6 +51,12 @@
    ```bash
    flask --app main run -p 5000
    ```
+
+## Using the Dockerfile
+1. Make sure the `CRED_PATH` file in the `.env` is using the correct path formatting (i.e. `./credentials.json` NOT `.\\firebase-credentials.json`) as the container runs on linux.
+2. Change the line copying the credentails file into the dockerfile to use the correct name of yoru json.
+3. Run `docker build -t question-service .` in the `question_service` directory to create a Docker image.
+4. Run `docker run -d -p 5000:5000 question-service` to start the Docker container.
 
 ## Debugging Mode
 
