@@ -3,26 +3,30 @@
 ## Setup
 
 1. Ensure you have **Python 3.8** or later installed:
+
    - Use `python3 --version` to check.
 
 2. Navigate to the `user_service` directory in your terminal.
 
 3. Set up a virtual environment:
-    ```bash
-    python3 -m venv .venv
-    ```
+
+   ```bash
+   python3 -m venv .venv
+   ```
 
 4. Activate the virtual environment:
-   - macOS/Linux:  
+
+   - macOS/Linux:
      ```bash
      source .venv/bin/activate
      ```
-   - Windows:  
+   - Windows:
      ```bash
      .venv\Scripts\activate
      ```
 
 5. Install the dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -45,16 +49,20 @@
 
 ## Running the Server
 
-1. Ensure the virtual environment is activated.
-2. Navigate to the `user_service/app` directory.
-3. Start the Flask server:
-   ```bash
-   flask --app main run -p 5001
-   ```
+1. Ensure the virtual environment is activated with
+    ```
+    .\venv\Scripts\activate
+    ```
+2. Navigate to the `user_service` directory.
+3. Start the Flask server
+    ```
+    python run.py
+    ```
 
 ## Debugging Mode
 
 To run the server with debugging enabled:
+
 ```bash
 flask --app main run -p 5001 --debug
 ```
@@ -63,10 +71,8 @@ flask --app main run -p 5001 --debug
 
 - **Get all users**:  
   `GET http://localhost:5001/users`
-  
 - **Get all active users**:  
   `GET http://localhost:5001/users/active`
-  
 - **Get a specific user by ID**:  
   `GET http://localhost:5001/users/<user_id>`
 
@@ -76,6 +82,7 @@ flask --app main run -p 5001 --debug
 - **Update a user by ID**:  
   `PATCH http://localhost:5001/users/<user_id>`
   - TODO: Not implemented properly yet
+
 ---
 
 ### Additional Notes
