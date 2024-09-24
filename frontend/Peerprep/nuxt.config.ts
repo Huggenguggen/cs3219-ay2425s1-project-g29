@@ -4,6 +4,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
   modules: ["nuxt-vuefire", "@nuxtjs/tailwindcss", "shadcn-nuxt"],
+  runtimeConfig: {
+    public: {
+      backendApiUrl: "http://localhost:8000",
+    },
+  },
   shadcn: {
     /**
      * Prefix for all the imported component
