@@ -39,29 +39,33 @@ const closeEditDialog = () => {
   isEditDialogOpen.value = false;
 };
 
+const refreshData = () => {
+  emit('refresh');
+  closeEditDialog();
+};
 </script>
 
 <template>
-    <Dialog>
-        <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-                <Button variant="ghost" class="w-8 h-8 p-0">
-                    <span class="sr-only">Open menu</span>
-                    <MoreHorizontal class="w-4 h-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem @click="openEditDialog">Edit</DropdownMenuItem>
-                <DropdownMenuItem @click="deleteQuestion">Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    </Dialog>
+    <DropdownMenu>
+        <DropdownMenuTrigger as-child>
+            <Button variant="ghost" class="w-8 h-8 p-0">
+                <span class="sr-only">Open menu</span>
+                <MoreHorizontal class="w-4 h-4" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem @click="openEditDialog">Edit</DropdownMenuItem>
+            <DropdownMenuItem @click="deleteQuestion">Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+    </DropdownMenu>
 
     <Dialog :open="isEditDialogOpen" @update:open="closeEditDialog">
         <EditQuestionDialog 
             :question="question"
-            :refreshData="() => { emit('refresh'); closeEditDialog(); }"
+            :refreshData="refreshData"
+            :isOpen="isEditDialogOpen"
+            @update:isOpen="isEditDialogOpen = $event"
         />
     </Dialog>
 </template>
