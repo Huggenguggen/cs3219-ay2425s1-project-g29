@@ -54,7 +54,7 @@
 
 ## Using the Dockerfile
 1. Make sure the `CRED_PATH` file in the `.env` is using the correct path formatting (i.e. `./credentials.json` NOT `.\\firebase-credentials.json`) as the container runs on linux.
-2. Change the line copying the credentails file into the dockerfile to use the correct name of yoru json.
+2. Change the line copying the credentails file into the dockerfile to use the correct name of your json.
 3. Run `docker build -t question-service .` in the `question_service` directory to create a Docker image.
 4. Run `docker run -d -p 5000:5000 question-service` to start the Docker container.
 
