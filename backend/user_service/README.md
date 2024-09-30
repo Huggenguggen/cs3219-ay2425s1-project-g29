@@ -42,10 +42,10 @@
 2. To retrieve the Firebase credentials file:
    - Go to the [Firebase Console](https://console.firebase.google.com/).
    - Navigate to **Project Settings** → **Service Accounts** → **Firebase Admin SDK** -> **Generate new private key**.
-   - Generate a new private key and download the credentials file to the `app` directory.
+   - Generate a new private key and download the credentials file to the `user_service` directory.
 3. Add the following variables to the `.env` file:
-   - `CRED_PATH`: This should be the relative path to your Firebase credentials file (e.g., `./credentials.json`).
-     - On windows this will be something like `.\\firebase-credentials.json`.
+   - `CRED_PATH`: This should be the relative path to your Firebase credentials file (e.g., `./firebase-cred.json`).
+     - On windows this will be something like `.\\firebase-cred.json`.
 
 ## Running the Server
 
@@ -60,8 +60,8 @@
    ```
 
 ## Using the Dockerfile 
-1. Make sure the `CRED_PATH` file in the `.env` is using the correct path formatting (i.e. `./credentials.json` NOT `.\\firebase-credentials.json`) as the container runs on linux.
-2. Change the line copying the credentails file into the dockerfile to use the correct name of yoru json.
+1. Make sure the `CRED_PATH` file in the `.env` is using the correct path formatting (i.e. `./firebase-cred.json` NOT `.\\firebase-cred.json`) as the container runs on linux.
+2. Change the line copying the credentials file into the dockerfile to use the correct name of your json.
 3. Run `docker build -t user-service .` in the `user_service` directory to create a Docker image.
 4. Run `docker run -d -p 5001:5001 user-service` to start the Docker container.
 
@@ -70,7 +70,7 @@
 To run the server with debugging enabled:
 
 ```bash
-flask --app main run -p 5001 --debug
+python run.py
 ```
 
 ## Available Endpoints
