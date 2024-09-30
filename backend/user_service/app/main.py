@@ -112,5 +112,20 @@ def patch_user(uid):
     except Exception as e:
         return jsonify({"error": "Failed to update user", "details": str(e)}), 500
 
+# Admin commands testing
+@app.route('/admin/add_admin/<uid>', methods=['POST'])
+def add_admin(uid):
+    try:
+        auth.set_custom_user_claims(uid, { 'admin': True })
+        return jsonify({"message": f"User with UID {uid} promoted to admin"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@app.route('/admin/is_admin/<uid>', methods=['GET'])
+def is_admin(uid):
+    user = auth.get_user(uid)
+    return jsonify(user.custom_claims.get('admin'))
+        
+
 if __name__ == '__main__':
   app.run(port=5001, debug=False, host='0.0.0.0')

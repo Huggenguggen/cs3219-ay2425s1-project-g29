@@ -5,16 +5,20 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app /app
+# Copy app and important files to container
+COPY ./app ./app
+COPY run.py ./
+COPY .env ./
+COPY firebase-cred.json ./firebase-cred.json
 
-COPY app/.env /app/.env
+# Expose port 5001 for Flask
+EXPOSE 5001
 
-# Copy importantjson.json and ensure it's in the path as per CRED_PATH
-COPY app/peerprep-g29-firebase-adminsdk-z24kx-e97d801b1c.json /app/peerprep-g29-firebase-adminsdk-z24kx-e97d801b1c.json
-
-# Expose port 5000 for Flask
-EXPOSE 5000
+# Set environment variables
+ENV FLASK_APP=run.py
+ENV PYTHONUNBUFFERED=1
 
 # Command to run your Flask app
-ENTRYPOINT ["python"]
-CMD ["main.py"]
+# ENTRYPOINT ["python"]
+# CMD ["run.py"]
+CMD ["waitress-serve", "--port=5001", "run:app"]
