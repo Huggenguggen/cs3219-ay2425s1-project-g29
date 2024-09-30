@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+import { ref, reactive } from 'vue';
 import type { Question } from '~/types/Question';
 import { useToast } from '@/components/ui/toast/use-toast';
 
@@ -7,24 +7,54 @@ const props = defineProps<{ refreshData: () => void }>();
 
 const { toast } = useToast();
 
-const question = ref<Question>({
+const question = reactive<Question>({
     title: "",
     description: "",
     category: "",
     difficulty: "easy",
 });
 
+const errors = reactive({
+    title: false,
+    description: false,
+    category: false,
+});
+
+const isDialogOpen = ref(false);
+
+const validateForm = () => {
+    let isValid = true;
+    errors.title = !question.title.trim();
+    errors.description = !question.description.trim();
+    errors.category = !question.category.trim();
+    
+    if (errors.title || errors.description || errors.category) {
+        isValid = false;
+    }
+    
+    return isValid;
+};
+
 const submitQuestion = async () => {
+    if (!validateForm()) {
+        toast({
+            title: "Validation Error",
+            description: "Please fill in all required fields.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     try {
-        const category_arr = question.value.category.split(',').map(cat => cat.trim());
+        const category_arr = question.category.split(',').map(cat => cat.trim());
         
         const { data, error } = await useFetch('http://localhost:5000/questions', {
             method: 'POST',
             body: JSON.stringify({
-                title: question.value.title,
-                description: question.value.description,
-                category: category_arr, // Send category as an array
-                difficulty: question.value.difficulty
+                title: question.title,
+                description: question.description,
+                category: category_arr,
+                difficulty: question.difficulty
             }),
             headers: { 'Content-Type': 'application/json' }
         });
@@ -33,12 +63,14 @@ const submitQuestion = async () => {
             const errorMessage = await error.value?.data;  
             toast({
                 title: "Error submitting question:",
-                description: errorMessage.error,  // Use the error message from the backend
+                description: errorMessage.error,
+                variant: "destructive",
             });
             console.error("Error submitting question:", errorMessage.error);
         } else {
             console.log("Submitted question successfully:", data.value);
             props.refreshData();
+            isDialogOpen.value = false; // Close the dialog only on successful submission
         }
     } catch (err) {
         console.error("An error occurred while submitting the question:", err);
@@ -47,9 +79,9 @@ const submitQuestion = async () => {
 </script>
 
 <template>
-    <Dialog>
+    <Dialog v-model:open="isDialogOpen">
         <DialogTrigger as-child>
-            <Button class="font-semibold text-md">
+            <Button class="font-semibold text-md" @click="isDialogOpen = true">
                 Add Question
             </Button>
         </DialogTrigger>
@@ -64,20 +96,28 @@ const submitQuestion = async () => {
                 <!-- Title -->
                 <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="title">Title</Label>
-                    <Input id="title" v-model="question.title" placeholder="Enter question title" class="col-span-3"
-                        required />
+                    <div class="col-span-3">
+                        <Input id="title" v-model="question.title" placeholder="Enter question title" :class="{ 'border-red-500': errors.title }" />
+                        <p v-if="errors.title" class="text-red-500 text-sm mt-1">Title is required</p>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="description">Description</Label>
-                    <Textarea id="description" v-model="question.description" placeholder="Enter question description"
-                        class="col-span-3 h-32" required />
+                    <div class="col-span-3">
+                        <Textarea id="description" v-model="question.description" placeholder="Enter question description"
+                            class="h-32" :class="{ 'border-red-500': errors.description }" />
+                        <p v-if="errors.description" class="text-red-500 text-sm mt-1">Description is required</p>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-4 items-center gap-4">
                     <Label for="category">Category</Label>
-                    <Input id="category" v-model="question.category" placeholder="Enter categories separated by commas"
-                        class="col-span-3" required />
+                    <div class="col-span-3">
+                        <Input id="category" v-model="question.category" placeholder="Enter categories separated by commas"
+                            :class="{ 'border-red-500': errors.category }" />
+                        <p v-if="errors.category" class="text-red-500 text-sm mt-1">Category is required</p>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-4 items-center gap-4">
@@ -95,11 +135,9 @@ const submitQuestion = async () => {
                         </SelectContent>
                     </Select>
                 </div>
-                <DialogClose>
-                    <Button type="submit" class="mt-4">
-                        Submit
-                    </Button>
-                </DialogClose>
+                <Button type="submit" class="mt-4">
+                    Submit
+                </Button>
             </form>
         </DialogContent>
     </Dialog>
