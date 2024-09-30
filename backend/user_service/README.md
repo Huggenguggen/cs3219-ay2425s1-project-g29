@@ -38,14 +38,14 @@
 
 ## Environment Variables
 
-1. Create a `.env` file in the `app` directory.
+1. Create a `.env` file in the `user_service` directory.
 2. To retrieve the Firebase credentials file:
    - Go to the [Firebase Console](https://console.firebase.google.com/).
    - Navigate to **Project Settings** → **Service Accounts** → **Firebase Admin SDK** -> **Generate new private key**.
    - Generate a new private key and download the credentials file to the `user_service` directory.
+   - Rename the credentials json file to `firebase-cred.json`
 3. Add the following variables to the `.env` file:
-   - `CRED_PATH`: This should be the relative path to your Firebase credentials file (e.g., `./firebase-cred.json`).
-     - On windows this will be something like `.\\firebase-cred.json`.
+   ```CRED_PATH=./firebase-cred.json```
 
 ## Running the Server
 
