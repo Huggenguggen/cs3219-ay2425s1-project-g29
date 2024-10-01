@@ -1,4 +1,33 @@
 services:
+  kafka:
+    image: 'bitnami/kafka:latest'
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - backend_network  
+
+  # Kafka UI for managing and monitoring Kafka
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest  # Kafka UI image
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local  # Name of the Kafka cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092  # Connect to Kafka broker at kafka:9092
+    ports:
+      - "8080:8080"  
+    depends_on:
+      - kafka  
+    networks:
+      - backend_network  
+
+
   rabbitmq:
     image: "rabbitmq:3-management"
     ports:
@@ -6,6 +35,10 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend_network
+
+
   matching-request:
     build:
       context: ./backend/matching_request
@@ -20,15 +53,9 @@ services:
       - ./backend/matching_request:/app
     ports:
       - "8000:8000"
-    develop:
-      watch:
-        - action: sync
-          path: ./backend/matching_request
-          target: /app
-          ignore:
-            - .venv/
-        - action: rebuild
-          path: ./backend/matching_request/requirements.txt
+    networks:
+      - backend_network
+
   matching_service:
     build:
       context: ./backend/matching_service
@@ -36,18 +63,11 @@ services:
     command: celery -A proj.celery worker --loglevel=info -Q matching_queue
     volumes:
       - ./backend/matching_service:/app
-    develop:
-      watch:
-        - action: sync
-          path: ./backend/matching_service
-          target: /app
-          ignore:
-            - .venv/
-        - action: rebuild
-          path: ./backend/matching_service/requirements.txt
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    networks:
+      - backend_network
 
   redis:
     image: redis:alpine
@@ -55,7 +75,13 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-
+    networks:
+      - backend_network
 volumes:
   rabbitmq_data:
   redis_data:
+  kafka_data:
+
+networks:
+  backend_network: 
+    driver: bridge
