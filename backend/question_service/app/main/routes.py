@@ -1,23 +1,8 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import firebase_admin
-from firebase_admin import credentials, firestore
-import os
-from dotenv import load_dotenv
+from . import main
+from flask import jsonify, request, Response
+from firebase_admin import firestore
 
-load_dotenv()
-
-# Initialize Firebase Admin SDK
-cred_path = os.getenv('CRED_PATH')
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = cred_path
-firebase_app = firebase_admin.initialize_app()
-
-# Initialize Firestore DB
 db = firestore.client()
-
-# Create Flask app
-app = Flask(__name__)
-CORS(app)
 
 REQUIRED_FIELDS = ['title', 'description', 'category', 'difficulty']
 
@@ -66,8 +51,7 @@ def is_title_unique(title, exclude_id=None):
             return False 
     return True
 
-
-@app.route('/questions', methods=['POST'])
+@main.route("/", methods=["POST"], strict_slashes=False)
 def add_question():
     # Get data from request
     question_data = request.json
@@ -86,7 +70,7 @@ def add_question():
 
     return jsonify({"id": question_ref[1].id, "message": "Question added"}), 201
 
-@app.route('/questions', methods=['GET'])
+@main.route("/", methods=["GET"])
 def get_questions():
     questions = []
     
@@ -100,7 +84,7 @@ def get_questions():
     
     return jsonify(questions), 200
 
-@app.route('/questions/<id>', methods=['GET'])
+@main.route("/<id>", methods=["GET"])
 def get_question(id):
     try:
         questions = []
@@ -116,14 +100,14 @@ def get_question(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/questions/<id>', methods=['DELETE'])
+@main.route("/<id>", methods=["DELETE"])
 def delete_question(id):
     # Delete a question by its Firestore document ID
     db.collection('questions').document(id).delete()
 
     return jsonify({"message": "Question deleted"}), 200
 
-@app.route('/questions/<id>', methods=['PUT'])
+@main.route("/<id>", methods=["PUT"])
 def update_question(id):
     # Get data from request
     question_data = request.json
@@ -144,6 +128,9 @@ def update_question(id):
 
     return jsonify({"message": "Question updated"}), 200
 
-
-if __name__ == '__main__':
-  app.run(port=5000, debug=False, host='0.0.0.0')
+# @main.before_request
+def before_request():
+    headers = { 'Access-Control-Allow-Origin': '*', 
+               'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', 
+               'Access-Control-Allow-Headers': 'Content-Type' } 
+    if request.method == 'OPTIONS' or request.method == 'options': return jsonify(headers), 200
