@@ -14,8 +14,8 @@ def publish_to_matching_queue(message):
         channel.queue_declare(queue=RABBITMQ_QUEUE, durable=True)
 
         celery_message_body = {
-            "args": [message],  # The actual message as an argument
-            "kwargs": {},  # Additional keyword arguments
+            "args": [message],
+            "kwargs": {},
         }
         channel.basic_publish(
             exchange="",
@@ -28,6 +28,7 @@ def publish_to_matching_queue(message):
                     "task": "process_match",
                 },
                 content_type="application/json",
+                expiration="28000",
             ),
         )
         connection.close()
@@ -38,4 +39,5 @@ def publish_to_matching_queue(message):
         return {"error": "RabbitMQ channel error. Please try again later."}, 500
 
     except Exception as e:
+        print("exception", e)
         return {"error": f"An unexpected error occurred with RabbitMQ."}, 500
