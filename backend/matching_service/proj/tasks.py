@@ -1,3 +1,4 @@
+import uuid
 from .celery import (
     app,
 )
@@ -27,27 +28,25 @@ def get_kafka_producer():
 )
 def process_matching_request(self, user_data):
     user_id = user_data["user_id"]
-    topic = user_data["topic"]
+    category = user_data["category"]
     difficulty = user_data["difficulty"]
     request_time = user_data["request_time"]
     expiration_time = request_time + 28
     print(
-        f"Received matching request: user_id={user_id}, topic={topic}, difficulty={difficulty}"
+        f"Received matching request: user_id={user_id}, category={category}, difficulty={difficulty}"
     )
 
-    key = f"matching:{topic}:{difficulty}"
-    topic_key = f"matching:{topic}"
+    key = f"matching:{category}:{difficulty}"
+    category_key = f"matching:{category}"
     pipe = None
-    # producer_config = {"bootstrap.servers": "kafka:9092", "debug": "broker, msg"}
-    # producer = Producer(producer_config)
     producer = get_kafka_producer()
     while True:
         try:
             current_time = time.time()
             min_timestamp = current_time - 28
             r.zremrangebyscore(key, "-inf", min_timestamp)
-            r.zremrangebyscore(topic_key, "-inf", min_timestamp)
-            r.watch(key, topic_key)
+            r.zremrangebyscore(category_key, "-inf", min_timestamp)
+            r.watch(key, category_key)
             pipe = r.pipeline()
             pipe.multi()
 
@@ -55,7 +54,7 @@ def process_matching_request(self, user_data):
             if complete_matches:
                 match = complete_matches[0]
                 pipe.zrem(key, match)
-                pipe.zrem(topic_key, match)
+                pipe.zrem(category_key, match)
                 pipe.execute()
 
                 print(
@@ -65,7 +64,7 @@ def process_matching_request(self, user_data):
                 push_to_kafka(
                     user_id=user_id,
                     match=match,
-                    topic=topic,
+                    category=category,
                     difficulty=difficulty,
                     producer=producer,
                 )
@@ -73,13 +72,13 @@ def process_matching_request(self, user_data):
                 return
 
             print(
-                f"Added user_id={user_id} to matching set for topic={topic} and difficulty={difficulty}"
+                f"Added user_id={user_id} to matching set for category={category} and difficulty={difficulty}"
             )
-            topic_matches = r.zrangebyscore(topic_key, min_timestamp, "+inf")
-            if topic_matches:
-                match = topic_matches[0]
+            category_matches = r.zrangebyscore(category_key, min_timestamp, "+inf")
+            if category_matches:
+                match = category_matches[0]
                 pipe.zrem(key, match)
-                pipe.zrem(topic_key, match)
+                pipe.zrem(category_key, match)
                 pipe.execute()
 
                 print(
@@ -88,7 +87,7 @@ def process_matching_request(self, user_data):
                 push_to_kafka(
                     user_id=user_id,
                     match=match,
-                    topic=topic,
+                    category=category,
                     difficulty=difficulty,
                     producer=producer,
                 )
@@ -96,10 +95,10 @@ def process_matching_request(self, user_data):
                 return
 
             pipe.zadd(key, {str(user_id): expiration_time})
-            pipe.zadd(topic_key, {str(user_id): expiration_time})
+            pipe.zadd(category_key, {str(user_id): expiration_time})
             pipe.execute()
             print(
-                f"No partial match found for user_id={user_id}, added to topic matching queue: {topic_key}"
+                f"No partial match found for user_id={user_id}, added to category matching queue: {category_key}"
             )
             return
         except redis.WatchError:
@@ -113,19 +112,20 @@ def delivery_report(record_metadata, exception):
         print(f"Message delivery failed: {exception}")
     else:
         print(
-            f"Message delivered to {record_metadata.topic} "
+            f"Message delivered to {record_metadata.category} "
             f"partition {record_metadata.partition} "
             f"offset {record_metadata.offset}"
         )
 
 
-def push_to_kafka(user_id, match, topic, difficulty, producer):
+def push_to_kafka(user_id, match, category, difficulty, producer):
     try:
         match_result = {
             "user1_id": user_id,
             "user2_id": match.decode("utf-8"),
-            "topic": topic,
+            "category": category,
             "difficulty": difficulty,
+            "uid": str(uuid.uuid4()),
         }
 
         print(f"Producing match result to Kafka: {match_result}")

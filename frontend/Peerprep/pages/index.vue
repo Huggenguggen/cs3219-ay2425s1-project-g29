@@ -35,21 +35,61 @@ const leetcodeTopics = [
 ]
 
 const difficulty = ref('easy')
-const selectedTopic = ref(leetcodeTopics.length > 0 ? leetcodeTopics[0].value : '')
+const selectedCategory = ref(leetcodeTopics.length > 0 ? leetcodeTopics[0].value : '')
 const isMatching = ref(false)
 const noMatch = ref(false)
 const matchTimeout = 30
 
 async function handleSubmit() {
-  console.log("selected difficulty", difficulty.value)
-  console.log("selected topic", selectedTopic.value)
-  $fetch(`${runtimeConfig.public.backendApiUrl}/matching/`, {
-    method: 'POST',
-    body: {
-      difficulty: difficulty.value,
-      topic: selectedTopic.value
-    }
+  isProcessing.value = true
+  isMatching.value = true
+  matchFound.value = false
+  const body = JSON.stringify({
+    user_id: user.value?.uid,
+    difficulty: difficulty.value,
+    category: selectedCategory.value
   })
+
+  try {
+    const response = await $fetch(`${runtimeConfig.public.matchingRequestUrl}/matching`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+      },
+      body: body
+    });
+    console.log("Matching request submitted successfully", response);
+    startMatchTimeout()
+    isProcessing.value = false
+  } catch (error: unknown) {
+    isMatching.value = false;
+    matchFound.value = false
+    const fetchError = createError(error as Partial<Error> & { data?: { error?: string } });
+    if (fetchError?.data?.error) {
+      console.error("Error from server:", fetchError.data.error);
+    } else if (fetchError.message) {
+      console.error("An error occurred:", fetchError.message);
+    } else {
+      console.error("An unknown error occurred:", error);
+    }
+  }
+}
+
+function startMatchTimeout() {
+  countdown.value = 30
+  countdownInterval = window.setInterval(() => {
+    if (countdown.value > 0) {
+      countdown.value -= 1
+    } else {
+      isMatching.value = false
+      matchFound.value = false
+      toast({
+        description: 'Failed to find a match within the given time.',
+        variant: 'destructive',
+      });
+      resetCountdown()
+    }
+  }, 1000)
 }
 
 </script>
@@ -65,8 +105,8 @@ async function handleSubmit() {
       <CardContent class="space-y-5">
         <form @submit.prevent="handleSubmit" class="space-y-6 px-4">
           <div class="flex items-center justify-between">
-            <Label class="text-lg">Difficulty</Label>
-            <Select v-model="difficulty">
+            <Label for="difficulty" class="text-lg">Difficulty</Label>
+            <Select id="difficulty" v-model="difficulty">
               <SelectTrigger class="w-[200px] font-medium px-4">
                 <SelectValue placeholder="Select a difficulty level" />
               </SelectTrigger>
@@ -85,8 +125,8 @@ async function handleSubmit() {
           </div>
 
           <div class="flex items-center justify-between">
-            <Label class="text-lg">Topic</Label>
-            <ComboBox :data="leetcodeTopics" v-model="selectedTopic" />
+            <Label class="text-lg">Category</Label>
+            <ComboBox :data="leetcodeTopics" v-model="selectedCategory" />
           </div>
 
           <div class="flex justify-center w-full">
