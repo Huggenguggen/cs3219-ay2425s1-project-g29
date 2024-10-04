@@ -1,10 +1,24 @@
 <script setup lang="ts">
 
+import { useToast } from '@/components/ui/toast/use-toast'
 import ComboBox from '@/components/ComboBox.vue'
+import { useWebSocket } from '@vueuse/core';
+import { useCollaborationStore, type TCollaborationInfo } from '~/store/collaborationStore';
 const auth = useFirebaseAuth();
 const user = useCurrentUser();
 const runtimeConfig = useRuntimeConfig()
-
+const collaborationStore = useCollaborationStore()
+const { toast } = useToast()
+const { status, data, send, open, close } = useWebSocket(`ws://localhost:8010/ws/${user?.value?.uid}`, {
+  autoReconnect: true,
+  onConnected: () => {
+    console.log('Connected to WebSocket server')
+  },
+  onDisconnected: () => {
+    console.log('Disconnected from WebSocket server')
+  },
+  onMessage: handleMessage,
+});
 
 const leetcodeTopics = [
   { value: 'arrays', label: 'Arrays' },
@@ -36,9 +50,66 @@ const leetcodeTopics = [
 
 const difficulty = ref('easy')
 const selectedCategory = ref(leetcodeTopics.length > 0 ? leetcodeTopics[0].value : '')
+const isProcessing = ref(false)
 const isMatching = ref(false)
-const noMatch = ref(false)
-const matchTimeout = 30
+const matchFound = ref(false)
+const countdown = ref(30)
+let countdownInterval: number | null = null
+
+async function handleMessage(ws: WebSocket, event: MessageEvent) {
+  if (isMatching.value) {
+    try {
+      const message = JSON.parse(event.data);
+      console.log('Received message:', message);
+      resetCountdown();
+      isMatching.value = false;
+      updateCollaborationInfo(message);
+    } catch (error) {
+      console.error("Failed to parse message:", error);
+    }
+  }
+}
+
+async function updateCollaborationInfo(message: any) {
+
+
+  const collaborationInfo: TCollaborationInfo = {
+    user1_id: message.user1_id,
+    user2_id: message.user2_id,
+    uid: message.uid,
+  };
+  console.log("parsed info to store:", collaborationInfo);
+
+  collaborationStore.setCollaborationInfo(collaborationInfo);
+
+  if (collaborationStore.isCollaborating) {
+    await navigateTo(`/collaboration`);
+    toast({
+      description: 'Match found! Redirecting to the collaboration room...',
+    });
+    matchFound.value = true;
+  }
+}
+
+async function handleCancel() {
+  try {
+    const response = await $fetch(`${runtimeConfig.public.matchingRequestUrl}/matching/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_id: user.value?.uid
+      })
+    });
+
+    console.log("Matching request canceled successfully", response);
+    isMatching.value = false;
+  } catch (error: unknown) {
+    isMatching.value = false;
+    console.error("Failed to cancel matching:", error);
+  }
+}
 
 async function handleSubmit() {
   isProcessing.value = true
@@ -52,8 +123,8 @@ async function handleSubmit() {
 
   try {
     const response = await $fetch(`${runtimeConfig.public.matchingRequestUrl}/matching`, {
-    method: 'POST',
-    headers: {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/json'
       },
       body: body
@@ -92,6 +163,16 @@ function startMatchTimeout() {
   }, 1000)
 }
 
+function resetCountdown() {
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+}
+
+onUnmounted(() => {
+  resetCountdown()
+});
 </script>
 
 <template>
@@ -130,11 +211,22 @@ function startMatchTimeout() {
           </div>
 
           <div class="flex justify-center w-full">
-            <Button class="w-3/4 mt-3">
+            <div v-if="isMatching" class="text-center ">
+              Matching... Time left: {{ countdown }} seconds
+              <Button type="button" @click="handleCancel" class="w-3/4 mt-3">
+                Cancel Matching
+              </Button>
+            </div>
+
+            <Button v-else class="w-3/4 mt-3"
+              :disabled="isProcessing || matchFound || collaborationStore.isCollaborating">
               Match
             </Button>
           </div>
         </form>
+        <Button @click="collaborationStore.clearCollaborationInfo" class="w-full">
+          Clear
+        </Button>
       </CardContent>
     </Card>
   </div>

@@ -2,12 +2,12 @@ services:
   kafka:
     image: 'bitnami/kafka:latest'
     environment:
-      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_NODE_ID=1
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092 
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     volumes:
       - kafka_data:/bitnami/kafka
@@ -38,8 +38,16 @@ services:
     networks:
       - backend_network
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend_network
 
-  matching-request:
+  matching_request:
     build:
       context: ./backend/matching_request
     # command: gunicorn --reload -w 4 -b 0.0.0.0:8000 run:app
@@ -48,11 +56,10 @@ services:
       - RABBITMQ_HOST=rabbitmq
       - FLASK_ENV=development # Set Flask environment to development
       - FLASK_APP=run.py # Set the main Flask app
-
-    volumes:
-      - ./backend/matching_request:/app
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend/matching_request:/app
     networks:
       - backend_network
 
@@ -69,14 +76,34 @@ services:
     networks:
       - backend_network
 
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
+  websocket_service:
+    build:
+      context: ./backend/websocket_service
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload --log-level debug
     volumes:
-      - redis_data:/data
+      - ./backend/websocket_service/app/:/app/app
+    environment:
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - kafka
+    ports:
+      - "8010:8010"
     networks:
       - backend_network
+  ui:
+    container_name: ui
+    build:
+      context: ./frontend/Peerprep
+    volumes:
+      - ./frontend/Peerprep:/src
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - backend_network
+
+
 volumes:
   rabbitmq_data:
   redis_data:
