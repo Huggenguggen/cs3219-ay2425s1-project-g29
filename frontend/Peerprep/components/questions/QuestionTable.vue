@@ -1,11 +1,11 @@
 <script setup lang="ts" generic="TData, TValue">
 import CreateQuestionDialog from './CreateQuestionDialog.vue';
-import type { ColumnDef } from '@tanstack/vue-table'
+import { getColumns } from '@/components/questions/columns'; // Import getColumns instead of columns
 import {
   FlexRender,
   getCoreRowModel,
   useVueTable,
-} from '@tanstack/vue-table'
+} from '@tanstack/vue-table';
 
 import {
   Table,
@@ -14,25 +14,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/components/ui/table';
 
 const props = defineProps<{
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-}>()
+  data: TData[];
+  refreshData: () => void; // Received from the parent
+}>();
+
+const columns = getColumns(props.refreshData); 
 
 const table = useVueTable({
   get data() { return props.data },
-  get columns() { return props.columns },
+  get columns() { return columns }, // Use dynamically created columns
   getCoreRowModel: getCoreRowModel(),
-})
+});
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center gap-y-4">
     <div class="flex w-full items-center">
       <h2 class="text-lg font-semibold mx-auto">Questions</h2>
-      <CreateQuestionDialog />
+      <CreateQuestionDialog :refresh-data="props.refreshData" />
     </div>
     <Table class="border rounded-md border-collapse">
       <TableHeader>
