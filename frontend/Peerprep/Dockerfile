@@ -1,31 +1,31 @@
 ARG NODE_VERSION=20.17.0
 
-FROM node:${NODE_VERSION}-slim as base
-
-ARG PORT=3000
-
-ENV NODE_ENV=production
+# Build stage
+FROM node:${NODE_VERSION}-slim as build
 
 WORKDIR /src
 
-# Build
-FROM base as build
+# Install dependencies
+COPY package.json package-lock.json ./
+RUN npm ci
 
-COPY --link package.json package-lock.json .
-RUN npm install --production=false
-
-COPY --link . .
-
+# Copy source and build
+COPY . .
 RUN npm run build
-RUN npm prune
 
-# Run
-FROM base
+# Production stage
+FROM node:${NODE_VERSION}-slim
 
-ENV PORT=$PORT
+WORKDIR /app
 
-COPY --from=build /src/.output /src/.output
-# Optional, only needed if you rely on unbundled dependencies
-# COPY --from=build /src/node_modules /src/node_modules
+# Environment variables
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=3000
 
-CMD [ "node", ".output/server/index.mjs" ]
+# Copy built assets from build stage
+COPY --from=build /src/.output /app
+
+EXPOSE 3000
+
+CMD [ "node", "/app/server/index.mjs" ]
