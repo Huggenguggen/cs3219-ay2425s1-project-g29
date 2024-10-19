@@ -33,3 +33,5 @@
 - Run the microservices.
 - Follow the steps in the `README.md` in `Peerprep` to setup the frontend.
 - Run the frontend using `npm run dev`
+
+Doing some testing with Github Actions
