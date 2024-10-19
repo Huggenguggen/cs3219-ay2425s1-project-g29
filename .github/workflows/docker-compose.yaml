@@ -34,8 +34,8 @@ jobs:
 
     # Build services using docker-compose
     - name: Build and Test with Docker Compose
-      run: docker-compose -f docker-compose.yaml up --build --exit-code-from backend
+      run: docker compose -f docker-compose.yaml up --build --exit-code-from backend
 
     # Optionally, clean up afterward
     - name: Cleanup
-      run: docker-compose down
+      run: docker compose down
