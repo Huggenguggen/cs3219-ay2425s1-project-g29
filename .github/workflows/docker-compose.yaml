@@ -39,12 +39,12 @@ jobs:
     # Sleep for 100 seconds to allow services to start
     - name: Wait for services to start
       run: sleep 100
-      
+
     # Check if all services are running
     - name: Check if all services are running
       run: |
-        running="$(docker-compose ps --services --filter "status=running")"
-        services="$(docker-compose ps --services)"
+        running="$(docker compose ps --services --filter "status=running")"
+        services="$(docker compose ps --services)"
         if [ "$running" != "$services" ]; then
           echo "Following services are not running:" 
           comm -13 <(sort <<<"$running") <(sort <<<"$services")
