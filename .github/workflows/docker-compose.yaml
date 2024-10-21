@@ -36,6 +36,10 @@ jobs:
     - name: Build and Test with Docker Compose
       run: docker compose -f docker-compose.yaml up -d --build
 
+    # sleep to wait for services to start runnning
+    - name: Wait for services to start running 
+      run: sleep 50
+
     # Check if all services are running
     - name: Check if all services are running
       run: |
